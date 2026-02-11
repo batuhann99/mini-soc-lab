@@ -54,4 +54,4 @@ Başarısız login denemeleri ile Wazuh'un olay tespiti doğrulandı:
 - 6 Authentication Failure tespit edildi
 - 16 Authentication Success loglandı
 - Toplam 448 event toplandı
-```
+  
