@@ -42,3 +42,20 @@ Konfigürasyon: `/etc/thehive/application.conf`
 4. TheHive secret key hatası → 256-bit üzeri key belirlendi
 5. Config syntax hatası → Parantez düzeltildi
 6. hostname formatında port belirtme → hostname = ["127.0.0.1:9201"]
+
+## Önemli: Wazuh OpenSearch Entegrasyonu
+
+Standalone Elasticsearch yerine Wazuh'un dahili OpenSearch motoru kullanılmaktadır.
+Bu sayede bir JVM process'i ortadan kalkmış ve ~500MB RAM tasarrufu sağlanmıştır.
+
+TheHive config'inde index.search bölümü:
+- Backend: elasticsearch
+- Hostname: 127.0.0.1
+- Port: 9200 (Wazuh OpenSearch)
+- SSL: enabled, trust-all
+- Auth: basic (admin / Wazuh dashboard şifresi)
+
+Manuel index oluşturma gerekli:
+- thehive_global
+- thehive_vertex  
+- thehive_edge
