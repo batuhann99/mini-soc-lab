@@ -10,30 +10,7 @@ This lab simulates a production SOC environment with three core platforms workin
 - **TheHive** — Case management and incident response platform
 - **Shuffle SOAR** — Security orchestration and automated response workflows
 
-### Architecture
-+------------------+     +------------------+     +------------------+
-|   Windows 10     |     |   SOC-Server     |     |   Kali Linux     |
-|   (Endpoint)     |     |   (Ubuntu 22.04) |     |   (Attacker)     |
-|                  |     |                  |     |                  |
-|  Wazuh Agent     +---->+  Wazuh Manager   |     |  nmap            |
-|  Sysmon v15      |     |  Wazuh Indexer   |     |  hydra           |
-|                  |     |  Wazuh Dashboard |     |  metasploit      |
-+------------------+     |                  |     +------------------+
-|  TheHive 5.7     |
-|  Shuffle SOAR    |
-|  OpenSearch      |
-|  Cassandra       |
-+--------+---------+
-|
-+--------v---------+
-|   Alert Pipeline  |
-|                  |
-|  Wazuh Alert     |
-|      ↓           |
-|  Shuffle Webhook |
-|      ↓           |
-|  TheHive Case    |
-+------------------+
+**Alert Pipeline:** Wazuh Agent → Wazuh Manager → Shuffle SOAR (Webhook) → TheHive (Case Creation)
 
 ## 🖥️ Lab Environment
 
@@ -53,32 +30,31 @@ This lab simulates a production SOC environment with three core platforms workin
 ## 🔧 Installed Components
 
 ### SOC-Server
-- **Wazuh 4.x** (All-in-One: Manager + Indexer + Dashboard)
-- **TheHive 5.7.0** (Incident Response Platform)
-- **Apache Cassandra 4.1.x** (TheHive database backend)
-- **Shuffle SOAR** (Docker Compose deployment)
-- **OpenSearch 3.2** (Shuffle database backend)
-- **2GB Swap** (RAM optimization)
+- **Wazuh 4.x** — All-in-One deployment (Manager + Indexer + Dashboard)
+- **TheHive 5.7.0** — Incident response and case management platform
+- **Apache Cassandra 4.1.x** — TheHive database backend
+- **Shuffle SOAR** — Deployed via Docker Compose
+- **OpenSearch 3.2** — Shuffle database backend
+- **2GB Swap** — RAM optimization for 8GB host constraint
 
 ### Windows Endpoint
-- **Wazuh Agent** (Active, reporting to SOC-Server)
-- **Sysmon v15.15** (SwiftOnSecurity config)
+- **Wazuh Agent** — Active, reporting to SOC-Server
+- **Sysmon v15.15** — Deployed with SwiftOnSecurity configuration
 
 ## ✅ Completed Features
 
 ### 1. Wazuh SIEM
 - Full Wazuh stack deployed and operational
-- Windows 10 endpoint monitored with active agent
+- Windows 10 endpoint monitored with active Wazuh agent
 - Real-time event collection and correlation
 - Custom dashboard configuration
 
 ### 2. Sysmon Integration
 - Sysmon v15.15 installed with SwiftOnSecurity ruleset
-- Sysmon events forwarded to Wazuh (Event ID mapping)
-- Process creation, network connections, file changes monitored
+- Sysmon events forwarded to Wazuh manager
+- Process creation, network connections, and file changes monitored
 
-### 3. Custom Detection Rules (MITRE ATT&CK Mapped)
-6 custom Wazuh detection rules implemented in `configs/wazuh/local_rules.xml`:
+### 3. Custom Detection Rules — MITRE ATT&CK Mapped
 
 | Rule ID | Name | MITRE Technique | Status |
 |---------|------|-----------------|--------|
@@ -91,8 +67,8 @@ This lab simulates a production SOC environment with three core platforms workin
 
 ### 4. File Integrity Monitoring (FIM)
 - FIM configured on critical Windows directories
-- Real-time file creation, modification, deletion alerts
-- Rules 550 and 554 triggering correctly
+- Real-time alerts on file creation, modification, and deletion
+- Wazuh rules 550 and 554 triggering correctly
 
 ### 5. Wazuh → Shuffle SOAR Pipeline
 - Shuffle SOAR deployed via Docker Compose
@@ -104,84 +80,54 @@ This lab simulates a production SOC environment with three core platforms workin
 ### 6. TheHive Case Management
 - TheHive 5.7.0 deployed with Cassandra backend
 - Integrated with Wazuh's internal OpenSearch (port 9200)
-- Accessible at http://10.0.2.12:9000
 - Organization and analyst user configured
 
 ## ⚠️ Known Limitations
 
 ### TheHive Community License
-TheHive 5.x community edition restricts operational features to non-admin organizations. Due to license quota limitations (0 additional organizations allowed), alert creation via API is blocked in the admin organization. 
-
-**Workaround options:**
-- Upgrade to TheHive 5 community with valid license registration
-- Migrate to TheHive 4.x (different license model, fully functional in community edition)
-- Use direct Wazuh → Shuffle pipeline without TheHive integration
+TheHive 5.x community edition restricts operational features to non-admin organizations. Due to license quota limitations, alert creation via API is blocked in the admin organization. Migration to TheHive 4.x would resolve this issue as it has a more permissive community license model.
 
 ### RAM Constraints
-With only 8GB host RAM, running all VMs simultaneously causes performance issues. The following optimizations were applied:
+With only 8GB host RAM, running all VMs simultaneously causes performance degradation. The following optimizations were applied:
+
 - Cassandra heap limited to 512MB
-- Wazuh Indexer heap limited to 512MB  
+- Wazuh Indexer heap limited to 512MB
 - Shuffle OpenSearch heap limited to 256MB
-- 2GB swap added to SOC-Server
-- Kali Linux only started when needed for attack simulations
+- 2GB swap file added to SOC-Server
 - Windows VM accessed via host port forwarding instead of direct VM GUI
+- Kali Linux started only when needed for attack simulations
 
 ## 📁 Repository Structure
-mini-soc-lab/
-├── configs/
-│   └── wazuh/
-│       └── local_rules.xml       # Custom MITRE ATT&CK detection rules
-├── docs/
-│   ├── 01-lab-setup.md           # VirtualBox and VM configuration
-│   ├── 02-wazuh-setup.md         # Wazuh SIEM installation guide
-│   ├── 03-sysmon-setup.md        # Sysmon installation and Wazuh integration
-│   ├── 04-detection-rules.md     # Custom detection rules documentation
-│   ├── 05-fim-setup.md           # File Integrity Monitoring setup
-│   ├── 06-thehive-setup.md       # TheHive installation and configuration
-│   └── 07-shuffle-setup.md       # Shuffle SOAR installation and integration
-├── scripts/
-│   └── start-all.sh              # Service startup script with correct ordering
-└── README.md
+
+| Path | Description |
+|------|-------------|
+| `configs/wazuh/local_rules.xml` | Custom MITRE ATT&CK detection rules |
+| `docs/01-lab-setup.md` | VirtualBox and VM configuration |
+| `docs/02-wazuh-setup.md` | Wazuh SIEM installation guide |
+| `docs/03-sysmon-setup.md` | Sysmon installation and Wazuh integration |
+| `docs/04-detection-rules.md` | Custom detection rules documentation |
+| `docs/05-fim-setup.md` | File Integrity Monitoring setup |
+| `docs/06-thehive-setup.md` | TheHive installation and configuration |
+| `docs/07-shuffle-setup.md` | Shuffle SOAR installation and integration |
+| `scripts/start-all.sh` | Automated service startup script |
 
 ## 🚀 Quick Start
 
-### Service Startup Order
-Due to service dependencies, the following startup order must be followed:
+Run the automated startup script after booting SOC-Server:
 
 ```bash
-# Run the automated startup script
 ./start-all.sh
 ```
 
-Manual order if needed:
-1. Cassandra (wait 40s)
-2. Wazuh Indexer (wait 60s)
-3. Wazuh Manager (wait 15s)
-4. Wazuh Dashboard (wait 15s)
-5. TheHive (wait ~8 minutes for full initialization)
-6. Shuffle Docker containers
+Services must start in this order due to dependencies: Cassandra → Wazuh Indexer → Wazuh Manager → Wazuh Dashboard → TheHive (~8 min) → Shuffle (Docker)
 
-### Access URLs (from host machine via port forwarding)
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Wazuh Dashboard | https://127.0.0.1:8443 | admin / [see docs] |
-| TheHive | http://127.0.0.1:9000 | admin@thehive.local / secret |
-| Shuffle | http://127.0.0.1:3001 | admin@soclab.local / [set during setup] |
+### Access URLs — Host Machine via Port Forwarding
 
-## 🔗 Alert Pipeline Flow
-Wazuh Agent (Windows)
-│
-│ Sysmon Events + Windows Logs
-▼
-Wazuh Manager (SOC-Server)
-│
-│ Matched against custom rules (level ≥ 3)
-▼
-Shuffle SOAR (Webhook)
-│
-│ Alert enrichment + workflow execution
-▼
-TheHive (Case Creation) ⚠️ Limited by community license
+| Service | URL |
+|---------|-----|
+| Wazuh Dashboard | https://127.0.0.1:8443 |
+| TheHive | http://127.0.0.1:9000 |
+| Shuffle | http://127.0.0.1:3001 |
 
 ## 🛠️ Technologies Used
 
@@ -196,19 +142,15 @@ TheHive (Case Creation) ⚠️ Limited by community license
 | Docker | Latest | Shuffle Deployment |
 | Ubuntu Server | 22.04 LTS | SOC Server OS |
 
-## 📚 Documentation
-
-Detailed setup guides for each component are available in the `docs/` directory. Each document covers installation steps, configuration, encountered issues, and solutions.
-
 ## 🎯 Skills Demonstrated
 
 - SIEM deployment and configuration
 - Security event correlation and custom rule writing
 - MITRE ATT&CK framework mapping
-- SOAR workflow automation
+- SOAR workflow design and automation
 - Incident response platform integration
 - Linux server administration
 - Docker container management
 - Network security monitoring
-- File Integrity Monitoring
-- Windows endpoint security (Sysmon)
+- File Integrity Monitoring (FIM)
+- Windows endpoint security with Sysmon
