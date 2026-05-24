@@ -154,3 +154,37 @@ Services must start in this order due to dependencies: Cassandra → Wazuh Index
 - Network security monitoring
 - File Integrity Monitoring (FIM)
 - Windows endpoint security with Sysmon
+
+## 📸 Screenshots
+
+### 🛡️ Wazuh SIEM
+
+![Wazuh Dashboard](screenshots/wazuh-dashboard-overview.png)
+*Wazuh Dashboard — Last 24 hours: 98 medium severity, 261 low severity alerts*
+
+![Sysmon Detection](screenshots/wazuh-sysmon-detection.png)
+*Threat Hunting — Sysmon events from windows-victim agent. Custom rule 100004 detects port scan attempts (rule level 10).*
+
+---
+
+### 🐝 TheHive (Incident Management)
+
+![TheHive Login](screenshots/thehive-login.png)
+*TheHive 5.7.0-1 — running on port 9000*
+
+![TheHive Admin](screenshots/thehive-admin-network.png)
+*TheHive admin panel — accessible from Windows VM over the network (10.0.2.12:9000)*
+
+---
+
+### 🔀 Shuffle SOAR
+
+![Shuffle Pipeline](screenshots/shuffle-wazuh-pipeline.png)
+*Wazuh-Alert-Pipeline workflow in Shuffle SOAR — multiple successful executions visible*
+
+---
+
+### 🖥️ Infrastructure
+
+![SOC Server Ports](screenshots/soc-server-ports.png)
+*SOC-Server active services: Wazuh OpenSearch (9200/9300), Cassandra (9042), TheHive (9000)*
